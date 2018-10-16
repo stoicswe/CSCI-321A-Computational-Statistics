@@ -55,8 +55,8 @@ def send_receive(bit=0,quantum_engine=''):
 def send_full_message(message='DataEspresso.com',quantum_engine=''):
     # Convert the string into binary values
     binary_encoded_message = [bin(ord(x))[2:].zfill(8) for x in message]
-    print('Message to send: ', message)
-    print('Binary message to send: ', binary_encoded_message)
+    #print('Message to send: ', message)
+    #print('Binary message to send: ', binary_encoded_message)
 
     received_bytes_list = []
     for letter in binary_encoded_message:
@@ -66,14 +66,15 @@ def send_full_message(message='DataEspresso.com',quantum_engine=''):
         received_bytes_list.append(received_bits)
 
     binary_to_string = ''.join([chr(int(x, 2)) for x in received_bytes_list])
-    print('Received Binary message: ', received_bytes_list)
-    print('Received message: ', binary_to_string)
+    #print('Received Binary message: ', received_bytes_list)
+    #print('Received message: ', binary_to_string)
+    return binary_to_string
 
 # Using the simulator as quantum engine
 quantum_engine=MainEngine()
-print("Alice Message")
-alice = input("> ")
-send_full_message(message=alice,quantum_engine=quantum_engine)
-print("Bob Message")
-bob = input("> ")
-send_full_message(message=alice,quantum_engine=quantum_engine)
+wp = ["Hey,Babe", "..."]
+for xi in sx:
+    rx.append(send_full_message(message=xi,quantum_engine=quantum_engine))
+# grab first, that word is word to predict on
+# then calculate probs for the words and make a prediction
+# for the next word that alice will state.
