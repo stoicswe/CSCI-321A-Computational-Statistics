@@ -1,6 +1,7 @@
 #! Christopher Ottesen
 from projectq.ops import All, CNOT, H, Measure, X, Z
 from projectq import MainEngine
+import numpy as np
 
 
 def create_bell_pair(quantum_engine):
@@ -72,9 +73,60 @@ def send_full_message(message='DataEspresso.com',quantum_engine=''):
 
 # Using the simulator as quantum engine
 quantum_engine=MainEngine()
-wp = ["Hey,Babe", "..."]
-for xi in sx:
+wp = [
+    "Hey,Babe", 
+    "Hello,Honey", 
+    "Read,SciFi", 
+    "Watch,Romance", 
+    "I,Love",
+    "Hey,Sweety",
+    "Read,Scifi",
+    "Read,Manga",
+    "I,Want",
+    "I,Need",
+    "I,Love",
+    "How,Are"
+    ]
+rx = []
+print("Sending data...")
+i = 0
+for xi in wp:
+    print("{0}%".format((i / len(wp)*100)))
     rx.append(send_full_message(message=xi,quantum_engine=quantum_engine))
-# grab first, that word is word to predict on
-# then calculate probs for the words and make a prediction
-# for the next word that alice will state.
+    i += 1
+learn = {}
+X = []
+y = []
+# learn = {"Hey" : [1 0 0 0]}
+# where the list is the probs of second-coming words
+# value will contain the words.
+for w in rx:
+    ws = w.split(",")
+    X.append(ws[0])
+
+for w in rx:
+    ws = w.split(",")
+    y.append(ws[1])
+
+for x in X:
+    if not (x in learn.keys()):
+        learn[x] = [0.0 for i in range(len(X))]
+
+# something is wrong with this algorithm. It needs to count the duplicates as higher probs
+
+for i in range(len(X)):
+    if X[i] in learn.keys():
+        t = learn[X[i]]
+        t[i] += 1.0
+        learn[X[i]] = t
+    
+keys = learn.keys()
+for k in keys:
+    t = learn[k]
+    learn[k] = [ts / sum(t) for ts in t]
+print(learn)
+
+# Alice sends a word to Bob, and Bob predicts:
+rw = send_full_message(message="Hey",quantum_engine=quantum_engine)
+print(learn[rw])
+print("Recieved: {0} Predicted next word: {1} With the probabilities: {2}".format(rw, np.random.choice(value, 1, p=learn[rw]), learn[rw]))
