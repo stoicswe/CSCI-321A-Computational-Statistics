@@ -90,12 +90,12 @@ def predict_data(y = ["Read,A","Read,B","Read,C","Read,D","Read,E"], count=100):
     # prep the data to learn on it...
     # ["A,B","B,D","B,C"], sent from this
     # dataset at random from alice...
+    # the resulting dataset that is generated
+    # is a 2D dictionary that contains the
+    # words as the keys and the counts as the
+    # values. First level is the label, the second
+    # is the word and the occurances of that combination
     learn = {}
-    """for x in rx:
-        for x2 in rx:
-            if x == x2:
-                if x in learn.keys():
-                    if """
     for i in range(len(rx)):
         for j in range(len(rx)):
             if i == j:
@@ -107,10 +107,20 @@ def predict_data(y = ["Read,A","Read,B","Read,C","Read,D","Read,E"], count=100):
                 else:
                     learn[rx[i]] = {ry[j] : 1}
     print(learn)
-    #w_predict = send_full_message(message=np.random.choice(learn_keys),quantum_engine=quantum_engine)
-    #print("Prediction on word: {0} results in expected word: {1}".format(w_predict, np.random.choice(learn_keys, 1, p=learn_probs)))
+
+    # calculate the probs for each "event" that occurs
+    fl_k = learn.keys()
+    for fk in fl_k:
+        sl_k = learn[fk].keys()
+        for sk in sl_k:
+            learn[fk][sk] = learn[fk][sk] / count
+
+    # predict the word based on a random word that alice decides to send to bob
+    w_predict = send_full_message(message=np.random.choice(learn.keys()),quantum_engine=quantum_engine)
+    prob_dict = learn[w_predict]
+    print("Prediction on word: {0} results in expected word: {1}".format(w_predict, np.random.choice(list(prob_dict.keys()), 1, p=list(prob_dict.values()))))
 
 # call the function to predict on a data:
 #predict_data()
-#predict_data(["Watch,Movie","Read,Book","See,Shows","Read,Magazine","Listen,Song"])
-predict_data(["A,B","B,D","B,C"])
+predict_data(["Watch,Movie","Read,Book","See,Shows","Read,Magazine","Listen,Song"])
+#predict_data(["A,B","B,D","B,C"])
