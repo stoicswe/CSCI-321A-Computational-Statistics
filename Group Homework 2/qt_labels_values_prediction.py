@@ -71,62 +71,46 @@ def send_full_message(message='DataEspresso.com',quantum_engine=''):
     #print('Received message: ', binary_to_string)
     return binary_to_string
 
+# build a dictionary of dictionaries st d = { fw1 : {sw1 : p1, sw2: p2, .. }, .. }
+
 # Using the simulator as quantum engine
-quantum_engine=MainEngine()
-wp = [
-    "Hey,Babe", 
-    "Hello,Honey", 
-    "Read,SciFi", 
-    "Watch,Romance", 
-    "I,Love",
-    "Hey,Sweety",
-    "Read,Scifi",
-    "Read,Manga",
-    "I,Want",
-    "I,Need",
-    "I,Love",
-    "How,Are"
-    ]
-rx = []
-print("Sending data...")
-i = 0
-for xi in wp:
-    print("{0}%".format((i / len(wp)*100)))
-    rx.append(send_full_message(message=xi,quantum_engine=quantum_engine))
-    i += 1
-learn = {}
-X = []
-y = []
-# learn = {"Hey" : [1 0 0 0]}
-# where the list is the probs of second-coming words
-# value will contain the words.
-for w in rx:
-    ws = w.split(",")
-    X.append(ws[0])
+def predict_data(y = ["Read,A","Read,B","Read,C","Read,D","Read,E"], count=100):
+    quantum_engine=MainEngine()
+    #y = ["Read,A","Read,B","Read,C","Read,D","Read,E"]
+    rx = []
+    ry = []
+    count = 100
+    for i in range(count):
+        percent = (i/count)*100
+        if percent % 10 == 0:
+            print("{0}% Completed...".format(percent))
+        w = np.random.choice(y)
+        rx.append(send_full_message(message=w,quantum_engine=quantum_engine).split(",")[0])
+        ry.append(send_full_message(message=w,quantum_engine=quantum_engine).split(",")[1])
+    # prep the data to learn on it...
+    # ["A,B","B,D","B,C"], sent from this
+    # dataset at random from alice...
+    learn = {}
+    """for x in rx:
+        for x2 in rx:
+            if x == x2:
+                if x in learn.keys():
+                    if """
+    for i in range(len(rx)):
+        for j in range(len(rx)):
+            if i == j:
+                if rx[i] in learn.keys():
+                    if ry[j] in learn[rx[i]].keys():
+                        learn[rx[i]][ry[j]] += 1
+                    else:
+                        learn[rx[i]][ry[j]] = 1
+                else:
+                    learn[rx[i]] = {ry[j] : 1}
+    print(learn)
+    #w_predict = send_full_message(message=np.random.choice(learn_keys),quantum_engine=quantum_engine)
+    #print("Prediction on word: {0} results in expected word: {1}".format(w_predict, np.random.choice(learn_keys, 1, p=learn_probs)))
 
-for w in rx:
-    ws = w.split(",")
-    y.append(ws[1])
-
-for x in X:
-    if not (x in learn.keys()):
-        learn[x] = [0.0 for i in range(len(X))]
-
-# something is wrong with this algorithm. It needs to count the duplicates as higher probs
-
-for i in range(len(X)):
-    if X[i] in learn.keys():
-        t = learn[X[i]]
-        t[i] += 1.0
-        learn[X[i]] = t
-    
-keys = learn.keys()
-for k in keys:
-    t = learn[k]
-    learn[k] = [ts / sum(t) for ts in t]
-print(learn)
-
-# Alice sends a word to Bob, and Bob predicts:
-rw = send_full_message(message="Hey",quantum_engine=quantum_engine)
-print(learn[rw])
-print("Recieved: {0} Predicted next word: {1} With the probabilities: {2}".format(rw, np.random.choice(value, 1, p=learn[rw]), learn[rw]))
+# call the function to predict on a data:
+#predict_data()
+#predict_data(["Watch,Movie","Read,Book","See,Shows","Read,Magazine","Listen,Song"])
+predict_data(["A,B","B,D","B,C"])
