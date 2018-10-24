@@ -74,17 +74,22 @@ def send_full_message(message='DataEspresso.com',quantum_engine=''):
 # build a dictionary of dictionaries st d = { fw1 : {sw1 : p1, sw2: p2, .. }, .. }
 
 # Using the simulator as quantum engine
-def predict_data(y = ["Read,A","Read,B","Read,C","Read,D","Read,E"], count=100):
+def predict_data(data, probs, count=100):
     quantum_engine=MainEngine()
-    #y = ["Read,A","Read,B","Read,C","Read,D","Read,E"]
+    print("Data")
+    print(data)
+    print("Probs")
+    print(probs)
+    print("Sending ===>")
     rx = []
     ry = []
-    count = 100
+    count = 10
     for i in range(count):
         percent = (i/count)*100
-        if percent % 10 == 0:
+        if percent % count/count == 0:
             print("{0}% Completed...".format(percent))
-        w = np.random.choice(y)
+        #w = np.random.choice(data)
+        w = np.random.choice(data, 1, p=probs)[0] # record the values for comparison with predicted
         rx.append(send_full_message(message=w,quantum_engine=quantum_engine).split(",")[0])
         ry.append(send_full_message(message=w,quantum_engine=quantum_engine).split(",")[1])
     # prep the data to learn on it...
@@ -106,6 +111,8 @@ def predict_data(y = ["Read,A","Read,B","Read,C","Read,D","Read,E"], count=100):
                         learn[rx[i]][ry[j]] = 1
                 else:
                     learn[rx[i]] = {ry[j] : 1}
+    print("Recieved <===")
+    print("Collected Data:")
     print(learn)
 
     # calculate the probs for each "event" that occurs
@@ -116,11 +123,13 @@ def predict_data(y = ["Read,A","Read,B","Read,C","Read,D","Read,E"], count=100):
             learn[fk][sk] = learn[fk][sk] / count
 
     # predict the word based on a random word that alice decides to send to bob
-    w_predict = send_full_message(message=np.random.choice(learn.keys()),quantum_engine=quantum_engine)
+    w_predict = send_full_message(message=np.random.choice(list(learn.keys())),quantum_engine=quantum_engine)
     prob_dict = learn[w_predict]
+    print("Probabilities:")
+    print(prob_dict)
     print("Prediction on word: {0} results in expected word: {1}".format(w_predict, np.random.choice(list(prob_dict.keys()), 1, p=list(prob_dict.values()))))
 
 # call the function to predict on a data:
-#predict_data()
-predict_data(["Watch,Movie","Read,Book","See,Shows","Read,Magazine","Listen,Song"])
+predict_data(["Read,A","Read,B","Read,C","Read,D","Read,E"], [0.05, 0.3, 0.4, 0.2, 0.05])
+predict_data(["Watch,Movie","Read,Book","See,Shows","Read,Magazine","Listen,Song"], [0.05, 0.3, 0.4, 0.2, 0.05])
 #predict_data(["A,B","B,D","B,C"])
