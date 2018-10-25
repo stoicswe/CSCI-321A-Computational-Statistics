@@ -62,7 +62,7 @@ def phone_mars(message='DataEspresso.com',quantum_engine=''):
             received_bits = received_bits + str(send_receive(int(bit),quantum_engine))
         received_bytes_list.append(received_bits)
     binary_to_string = ''.join([chr(int(x, 2)) for x in received_bytes_list])
-    return binary_to_string
+    return str(binary_to_string)
 
 def phone_home(message='DataEspresso.com',quantum_engine=''):
     binary_encoded_message = [bin(ord(x))[2:].zfill(8) for x in message]
@@ -73,10 +73,10 @@ def phone_home(message='DataEspresso.com',quantum_engine=''):
             received_bits = received_bits + str(send_receive(int(bit),quantum_engine))
         received_bytes_list.append(received_bits)
     binary_to_string = ''.join([chr(int(x, 2)) for x in received_bytes_list])
-    return binary_to_string
+    return str(binary_to_string)
 
-train = [['0,0,0'],['0,1,1'],['1,0,1'],['1,1,1']]
-y_train = [['0'],['1'],['1'],['1']]
+train = [["0,0,0"],["0,1,1"],["1,0,1"],["1,1,1"]]
+y_train = [["0"],["1"],["1"],["1"]]
 
 test = train
 y_test = y_train
@@ -96,18 +96,18 @@ while error > 0:
     index = np.random.choice([0,1,2,3])
     data_to_send = train[index]
     data_recieved = phone_mars(message=data_to_send[0], quantum_engine=quantum_engine)
+    data_recieved = data_recieved.split(",")
     print(data_recieved)
-    data_recieved = data_recieved.split(',')
     td = [int(data_recieved[0]), int(data_recieved[1])]
-    lb = [int(data_recieved[2])]
+    lb = int(data_recieved[2])
 
     index2 = np.random.choice([0,1,2,3])
     data_to_send2 = train[index]
     data_recieved2 = phone_mars(message=data_to_send2[0], quantum_engine=quantum_engine)
+    data_recieved2 = data_recieved2.split(",")
     print(data_recieved2)
-    data_recieved2 = data_recieved2.split(',')
     td2 = [int(data_recieved2[0]), int(data_recieved2[1])]
-    lb2 = [int(data_recieved2[2])]
+    lb2 = int(data_recieved2[2])
 
     td = [td, td2]
     lb = [lb, lb2]
@@ -121,11 +121,22 @@ while error > 0:
     print("Epoch: ", epoch)
     print("Model Error: ", error)
     epoch += 1
+
 test_x = []
 test_y = []
 for t in train:
     data_recieved = phone_mars(message=t[0], quantum_engine=quantum_engine)
-    td = [float(data_recieved[0]), float(data_recieved[1])]
-    lb = [int(data_recieved[2])]
+    td = [int(data_recieved[0], 10), int(data_recieved[1], 10)]
+    lb = [int(data_recieved[2], 10)]
     test_x.append(td)
     test_y.append(lb)
+pred_y = clf.predict(test_x)
+
+isAccurate = True
+for i in range(len(pred_y)):
+    if pred_y[i] != test_y[i]:
+        isAccurate = False
+res = "accurate."
+if isAccurate == False:
+    res = "not accurate."
+print("Bob's model is ", res)
