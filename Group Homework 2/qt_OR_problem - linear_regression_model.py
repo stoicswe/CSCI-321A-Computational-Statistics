@@ -4,6 +4,28 @@ from projectq import MainEngine
 from sklearn.linear_model import LogisticRegression
 import numpy as np
 
+class Perceptron(object):
+
+    def __init__(self, no_of_inputs, threshold=100, learning_rate=0.01):
+        self.threshold = threshold
+        self.learning_rate = learning_rate
+        self.weights = np.zeros(no_of_inputs + 1)
+           
+    def predict(self, inputs):
+        summation = np.dot(inputs, self.weights[1:]) + self.weights[0]
+        if summation > 0:
+          activiation = 1
+        else:
+          activation = 0            
+        return activation
+
+    def train(self, training_inputs, labels):
+        for _ in range(self.threshold):
+            for inputs, label in zip(training_inputs, labels):
+                prediction = self.predict(inputs)
+                self.weights[1:] += self.learning_rate * (label - prediction) * inputs
+                self.weights[0] += self.learning_rate * (label - prediction)
+
 def create_bell_pair(quantum_engine):
     # Qubit one is 'Alices' qubit, and will be used to create a message state
     qubit_one = quantum_engine.allocate_qubit()
@@ -80,8 +102,6 @@ y_train = [["0"],["1"],["1"],["1"]]
 
 test = train
 y_test = y_train
-#clf = LogisticRegression().fit(X,y)
-#error = 1 - clf.score(X,y)
 quantum_engine=MainEngine()
 clf = LogisticRegression()
 print("Alice:")
@@ -93,29 +113,29 @@ print("Training on the data...")
 error = 50
 epoch = 0
 while error > 0:
-    index = np.random.choice([0,1,2,3])
+    index = 0
     data_to_send = train[index]
     data_recieved = phone_mars(message=data_to_send[0], quantum_engine=quantum_engine)
     data_recieved = data_recieved.split(",")
-    print(data_recieved)
     td = [int(data_recieved[0]), int(data_recieved[1])]
     lb = int(data_recieved[2])
 
-    index2 = np.random.choice([0,1,2,3])
-    data_to_send2 = train[index]
+    index2 = np.random.choice([1,2,3])
+    data_to_send2 = train[index2]
     data_recieved2 = phone_mars(message=data_to_send2[0], quantum_engine=quantum_engine)
     data_recieved2 = data_recieved2.split(",")
-    print(data_recieved2)
     td2 = [int(data_recieved2[0]), int(data_recieved2[1])]
     lb2 = int(data_recieved2[2])
 
     td = [td, td2]
     lb = [lb, lb2]
+    print(td)
+    print(lb)
 
     clf_model = clf.fit(td, lb)
     clf = clf_model
 
-    error_str = phone_home(message=str(clf.score(td,lb)), quantum_engine=quantum_engine)
+    error_str = phone_home(message=str(1 - clf.score(td,lb)), quantum_engine=quantum_engine)
     error = float(error_str)
     print("------------------------")
     print("Epoch: ", epoch)
