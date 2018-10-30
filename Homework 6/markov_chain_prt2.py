@@ -6,8 +6,8 @@ words = []
 f = input("Enter a file to open: ")
 text = open("./" + f)
 if os.path.isfile(f + "chain.json"):
-    chain = json.load(f + "chain.json")
-    chain = json.load(f + "chain2.json")
+    chain = json.load(f + "_chain.json")
+    chain = json.load(f + "_chain2.json")
 
 
 print("Loading text into memory...")
@@ -46,16 +46,16 @@ for i, key1 in enumerate(words):
         else:
             chain2[(key1, key2)].append(word)
 
-print("Saving chains...")
-json = json.dumps(chain)
-f = open(f + "chain.json","w")
-f.write(json)
+"""print("Saving chains...")
+jsonf = json.dumps(chain)
+f = open(f + "_chain.json","w")
+f.write(jsonf)
 f.close()
 
-json = json.dumps(chain2)
-f = open(f + "chain2.json","w")
-f.write(json)
-f.close()
+jsonf = json.dumps(chain2)
+f = open(f + "_chain2.json","w")
+f.write(jsonf)
+f.close()"""
 
 kez = chain2.keys()
 while True:
