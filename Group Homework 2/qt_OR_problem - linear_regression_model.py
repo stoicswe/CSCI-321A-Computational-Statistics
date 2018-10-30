@@ -10,11 +10,12 @@ class Perceptron(object):
         self.threshold = threshold
         self.learning_rate = learning_rate
         self.weights = np.zeros(no_of_inputs + 1)
+        self.error = 0
            
     def predict(self, inputs):
         summation = np.dot(inputs, self.weights[1:]) + self.weights[0]
         if summation > 0:
-          activiation = 1
+          activation = 1
         else:
           activation = 0            
         return activation
@@ -25,6 +26,10 @@ class Perceptron(object):
                 prediction = self.predict(inputs)
                 self.weights[1:] += self.learning_rate * (label - prediction) * inputs
                 self.weights[0] += self.learning_rate * (label - prediction)
+                self.error = (np.dot(inputs[0], self.weights) * labels[0])
+    
+    def score(self):
+        return self.error
 
 def create_bell_pair(quantum_engine):
     # Qubit one is 'Alices' qubit, and will be used to create a message state
@@ -104,53 +109,72 @@ test = train
 y_test = y_train
 quantum_engine=MainEngine()
 clf = LogisticRegression()
-print("Alice:")
-print(phone_mars(message="Hey, did you start the machine learning homework Dr. Hu assigned?", quantum_engine=quantum_engine))
-print("Bob:")
-print(phone_home(message="Sh*t i didnt get to do it yet...let me start!", quantum_engine=quantum_engine))
-print(phone_home(message="Send me the data!", quantum_engine=quantum_engine))
+#print("Alice:")
+#print(phone_mars(message="Hey, did you start the machine learning homework Dr. Hu assigned?", quantum_engine=quantum_engine))
+#print("Bob:")
+#print(phone_home(message="Sh*t i didnt get to do it yet...let me start!", quantum_engine=quantum_engine))
+#print(phone_home(message="Send me the data!", quantum_engine=quantum_engine))
 print("Training on the data...")
 error = 50
 epoch = 0
-while error > 0:
-    index = 0
-    data_to_send = train[index]
-    data_recieved = phone_mars(message=data_to_send[0], quantum_engine=quantum_engine)
+#percy = Perceptron(2)
+
+train_x = []
+train_y = []
+for t in train:
+    data_recieved = phone_mars(message=t[0], quantum_engine=quantum_engine)
     data_recieved = data_recieved.split(",")
-    td = [int(data_recieved[0]), int(data_recieved[1])]
-    lb = int(data_recieved[2])
+    td = [int(data_recieved[0], 10), int(data_recieved[1], 10)]
+    lb = int(data_recieved[2], 10)
+    train_x.append(td)
+    train_y.append(lb)
+#print(train_x)
+#print(train_y)
+clf.fit(train_x, train_y)
+index = [0,1,2,3]
 
-    index2 = np.random.choice([1,2,3])
-    data_to_send2 = train[index2]
-    data_recieved2 = phone_mars(message=data_to_send2[0], quantum_engine=quantum_engine)
-    data_recieved2 = data_recieved2.split(",")
-    td2 = [int(data_recieved2[0]), int(data_recieved2[1])]
-    lb2 = int(data_recieved2[2])
+error_str = phone_home(message=str(1 - clf.score(train_x,train_y)), quantum_engine=quantum_engine)
+error = float(error_str)
+print("------------------------")
+print("Epoch: ", epoch)
+print("Model Error: ", error)
+epoch += 1
 
-    td = [td, td2]
-    lb = [lb, lb2]
-    print(td)
-    print(lb)
-
-    clf_model = clf.fit(td, lb)
-    clf = clf_model
-
-    error_str = phone_home(message=str(1 - clf.score(td,lb)), quantum_engine=quantum_engine)
+while error > 0:
+    error_str = phone_home(message=str(1 - clf.score(train_x,train_y)), quantum_engine=quantum_engine)
     error = float(error_str)
     print("------------------------")
     print("Epoch: ", epoch)
     print("Model Error: ", error)
     epoch += 1
 
+    if error > 0:
+        for t in train:
+            i = np.random.choice(index)
+            data = train[i]
+            data_recieved = phone_mars(message=data[0], quantum_engine=quantum_engine)
+            data_recieved = data_recieved.split(",")
+            td = [int(data_recieved[0], 10), int(data_recieved[1], 10)]
+            lb = int(data_recieved[2], 10)
+            train_x.append(td)
+            train_y.append(lb)
+        #print(train_x)
+        #print(train_y)
+        clf.fit(train_x, train_y)
+
 test_x = []
 test_y = []
 for t in train:
     data_recieved = phone_mars(message=t[0], quantum_engine=quantum_engine)
+    data_recieved = data_recieved.split(",")
     td = [int(data_recieved[0], 10), int(data_recieved[1], 10)]
     lb = [int(data_recieved[2], 10)]
     test_x.append(td)
     test_y.append(lb)
+print("Testing on:")
+print(test_x)
 pred_y = clf.predict(test_x)
+print(pred_y)
 
 isAccurate = True
 for i in range(len(pred_y)):
