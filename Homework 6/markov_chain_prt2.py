@@ -67,7 +67,7 @@ while True:
         while error == True:
             try:
                 w1 = random.choice(words)
-                w2 = random.choice(chain[w1])
+                w2 = random.choice(words)
                 error = False
             except:
                 error = True
