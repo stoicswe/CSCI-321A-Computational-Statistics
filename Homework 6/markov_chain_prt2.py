@@ -1,19 +1,14 @@
 import random
-import json
-import os.path
 
 words = []
 f = input("Enter a file to open: ")
 text = open("./" + f)
-if os.path.isfile(f + "chain.json"):
-    chain = json.load(f + "_chain.json")
-    chain = json.load(f + "_chain2.json")
-
 
 print("Loading text into memory...")
 i = 0
 for line in text:
     line = line.replace('\r', ' ').replace('\n', ' ')
+    line = line.lower()
     new_words = line.split(' ')
     new_words = [word for word in new_words if word not in ['', ' ']]
     words = words + new_words
@@ -46,17 +41,6 @@ for i, key1 in enumerate(words):
         else:
             chain2[(key1, key2)].append(word)
 
-"""print("Saving chains...")
-jsonf = json.dumps(chain)
-f = open(f + "_chain.json","w")
-f.write(jsonf)
-f.close()
-
-jsonf = json.dumps(chain2)
-f = open(f + "_chain2.json","w")
-f.write(jsonf)
-f.close()"""
-
 kez = chain2.keys()
 while True:
     l = int(input("How long of a text to generate? "))
@@ -73,7 +57,7 @@ while True:
                 error = True
 
         tweet = w1 + ' ' + w2
-
+        last = ""
         while len(tweet) < l:
             ts = tweet.split(' ')
             w1 = ts[len(ts)-2]
@@ -85,7 +69,12 @@ while True:
                         ks.append(k)
             try:
                 w2 = random.choice(chain2[random.choice(ks)])
+                if last == w2:
+                    w2 = random.choice(chain[w1])
+                if w1 == w2:
+                    w2 = random.choice(words)
                 error = False
+                last = w2
             except:
                 try:
                     w2 = random.choice(chain[w1])
