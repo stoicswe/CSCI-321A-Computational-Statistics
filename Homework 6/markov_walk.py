@@ -3,7 +3,7 @@ import random
 
 transition_matrix = [ [0.5,0.35,0.15,0.], [0.,0.,0.2,0.8], [0.,0.,0.3,0.7], [1.0,0.,0.,0.]]
 state_vector = [0.,1.0,0.,0.]
-super_position_state = numpy.dot(state_vector, transition_matrix)
+super_position_state = np.dot(state_vector, transition_matrix)
 
 def get_next_state(super_position_state):
     weight_precision = 1000
@@ -28,6 +28,6 @@ def get_state(state_vector):
     return 'S' + str(index[0])
 
 for i in range(100):
-    super_position_state = numpy.dot(state_vector, transition_matrix)
+    super_position_state = np.dot(state_vector, transition_matrix)
     state_vector = get_next_state(super_position_state)
     print(state_vector, ':', get_state(state_vector))
