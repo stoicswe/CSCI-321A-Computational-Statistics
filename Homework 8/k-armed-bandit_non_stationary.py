@@ -58,6 +58,7 @@ class EGreedy(KBanditSolution):
             if (i % 100 == 0):
                 r_mean = np.mean(rewards[-100:])
                 rewards_mean.append(r_mean)
+            #rewards_mean.append(reward)
             self.count_statistics(action, reward, i)
         return rewards_mean
 
